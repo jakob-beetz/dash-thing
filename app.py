@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageOps
 import streamlit as st
 from PIL import Image, ImageDraw, ImageOps
 import numpy as np
-from streamlit_canvas import st_canvas
+from streamlit_drawable_canvas import st_canvas
 
 def main():
     # Set up the sidebar
