@@ -1,13 +1,15 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageOps
 
+import streamlit as st
+from PIL import Image, ImageDraw, ImageOps
+import numpy as np
+
 def main():
     # Set up the sidebar
     st.sidebar.title("Image Editor")
     image_file = st.sidebar.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
     overlay_file = st.sidebar.file_uploader("Choose an overlay file", type=["jpg", "jpeg", "png"])
-    scale = st.sidebar.slider("Scale", min_value=0.1, max_value=10.0, step=0.1, value=1.0)
-    rotation = st.sidebar.slider("Rotation", min_value=-180, max_value=180, step=1, value=0)
 
     # Set up the main window
     st.title("Image Editor")
@@ -21,16 +23,31 @@ def main():
         return
     overlay = Image.open(overlay_file)
 
-    # Scale and rotate the overlay image
-    overlay = overlay.rotate(rotation, expand=True)
-    overlay = overlay.resize((int(overlay.width * scale), int(overlay.height * scale)))
+    # Initialize canvas to display image
+    canvas_result = st_canvas(
+        fill_color="rgba(0, 0, 0, 0)",
+        stroke_width=3,
+        stroke_color="rgba(255, 0, 0, 1)",
+        background_image=image,
+        height=image.height,
+        width=image.width,
+        drawing_mode="transform",
+        display_toolbar=True,
+        key="canvas",
+    )
 
-    # Draw the overlay onto the image
-    image.paste(overlay, (0, 0), overlay)
-
-    # Show the edited image
-    st.image(image, caption="Edited Image", use_column_width=True)
+    # Apply transformations to the overlay image
+    if canvas_result.image_data is not None:
+        result = Image.fromarray(canvas_result.image_data.astype("uint8"), mode="RGBA")
+        # Create a blank white image to overlay the transformed overlay image onto
+        blank = Image.new("RGBA", image.size, (255, 255, 255, 255))
+        # Resize the overlay image to fit the transformed bounding box
+        overlay_resized = overlay.resize(result.size)
+        # Overlay the resized overlay image onto the blank image
+        blank.alpha_composite(overlay_resized, dest=(int(canvas_result.object_coords[0]), int(canvas_result.object_coords[1])))
+        # Update the result image with the overlaid image
+        result = Image.alpha_composite(result, blank)
+        st.image(result, caption="Edited Image", use_column_width=True)
 
 if __name__ == "__main__":
     main()
-
