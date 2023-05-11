@@ -37,7 +37,7 @@ def main():
         key="canvas",
     )
 
- if canvas_result.image_data is not None:
+    if canvas_result.image_data is not None:
         result = Image.fromarray(canvas_result.image_data.astype("uint8"), mode="RGBA")
         # Create a blank white image to overlay the transformed overlay image onto
         blank = Image.new("RGBA", image.size, (255, 255, 255, 255))
