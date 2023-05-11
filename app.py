@@ -37,15 +37,15 @@ def main():
         key="canvas",
     )
 
-    # Apply transformations to the overlay image
-    if canvas_result.image_data is not None:
+ if canvas_result.image_data is not None:
         result = Image.fromarray(canvas_result.image_data.astype("uint8"), mode="RGBA")
         # Create a blank white image to overlay the transformed overlay image onto
         blank = Image.new("RGBA", image.size, (255, 255, 255, 255))
         # Resize the overlay image to fit the transformed bounding box
         overlay_resized = overlay.resize(result.size)
         # Overlay the resized overlay image onto the blank image
-        blank.alpha_composite(overlay_resized, dest=(int(canvas_result.object_coords[0]), int(canvas_result.object_coords[1])))
+        top_left = canvas_result.top_left if canvas_result.top_left is not None else (0, 0)
+        blank.alpha_composite(overlay_resized, dest=(int(top_left[0]), int(top_left[1])))
         # Update the result image with the overlaid image
         result = Image.alpha_composite(result, blank)
         st.image(result, caption="Edited Image", use_column_width=True)
